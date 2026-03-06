@@ -14,7 +14,11 @@
         <video id="camera-feed" playsinline autoplay muted></video>
         
         <!-- Наложение: Видео с фигуркой на прозрачном фоне -->
-        <video id="overlay-video" src="fig.webm" playsinline autoplay loop muted></video>
+       <video id="overlay-video" playsinline autoplay loop muted>
+            <source src="fig.webm" type="video/webm">
+            <source src="fig.mp4" type="video/mp4">
+            <!-- Если ни один не подойдет, покажет текст -->
+        </video>
 
         <!-- Холст для захвата фото (скрыт) -->
         <canvas id="photo-canvas" style="display: none;"></canvas>
@@ -34,5 +38,6 @@
 </body>
 
 </html>
+
 
 
