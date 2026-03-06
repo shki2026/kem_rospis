@@ -38,7 +38,7 @@ function getFigurkaFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const figurka = urlParams.get('figurka');
     if (figurka) {
-        overlayVideo.src = `${figurka}.webm`;
+        overlayVideo.src = `роспись-1.webm`;
     }
 }
 
@@ -112,3 +112,4 @@ getFigurkaFromURL();
 
 captureBtn.addEventListener('click', capturePhoto);
 window.addEventListener('beforeunload', stopCamera);
+
