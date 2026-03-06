@@ -34,13 +34,13 @@ async function startCamera() {
 }
 
 // Функция для получения параметра из URL
-function getFigurkaFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const figurka = urlParams.get('figurka');
-    if (figurka) {
-        overlayVideo.src = `роспись-1.webm`;
-    }
-}
+//function getFigurkaFromURL() {
+    //const urlParams = new URLSearchParams(window.location.search);
+    //const figurka = urlParams.get('figurka');
+   // if (figurka) {
+       // overlayVideo.src = `роспись-1.webm`;
+   // }
+//}
 
 // Функция для создания фото
 function capturePhoto() {
@@ -108,8 +108,9 @@ overlayVideo.addEventListener('loadeddata', () => {
 
 // Запускаем камеру
 startCamera();
-getFigurkaFromURL();
+//getFigurkaFromURL();
 
 captureBtn.addEventListener('click', capturePhoto);
 window.addEventListener('beforeunload', stopCamera);
+
 
