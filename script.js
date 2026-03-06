@@ -6,12 +6,12 @@ const canvas = document.getElementById('photo-canvas');
 const resultPhoto = document.getElementById('result-photo');
 const downloadBtn = document.getElementById('download-btn');
 
-// Функция для запуска камеры (теперь с задней камерой)
+// Функция для запуска камеры
 async function startCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
             video: {
-                facingMode: 'environment', // environment = задняя камера
+                facingMode: 'environment',
                 width: { ideal: 1920 },
                 height: { ideal: 1080 }
             },
@@ -19,7 +19,6 @@ async function startCamera() {
         });
         cameraFeed.srcObject = stream;
     } catch (err) {
-        // Если задняя камера недоступна, пробуем любую
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: true,
@@ -32,15 +31,6 @@ async function startCamera() {
         }
     }
 }
-
-// Функция для получения параметра из URL
-//function getFigurkaFromURL() {
-    //const urlParams = new URLSearchParams(window.location.search);
-    //const figurka = urlParams.get('figurka');
-   // if (figurka) {
-       // overlayVideo.src = `роспись-1.webm`;
-   // }
-//}
 
 // Функция для создания фото
 function capturePhoto() {
@@ -57,34 +47,53 @@ function capturePhoto() {
     // Рисуем фон с камеры
     ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
     
-    // Получаем позицию фигурки
-    const overlayRect = overlayVideo.getBoundingClientRect();
-    const cameraRect = cameraFeed.getBoundingClientRect();
-    
-    const scaleX = canvas.width / cameraRect.width;
-    const scaleY = canvas.height / cameraRect.height;
-    
-    const x = (overlayRect.left - cameraRect.left) * scaleX;
-    const y = (overlayRect.top - cameraRect.top) * scaleY;
-    const width = overlayRect.width * scaleX;
-    const height = overlayRect.height * scaleY;
-    
     // Рисуем фигурку
-    ctx.drawImage(overlayVideo, x, y, width, height);
+    ctx.drawImage(overlayVideo, 0, 0, canvas.width, canvas.height);
     
     // Показываем результат
     const dataUrl = canvas.toDataURL('image/png');
     resultPhoto.src = dataUrl;
     resultPhoto.style.display = 'block';
     
-    downloadBtn.href = dataUrl;
-    downloadBtn.style.display = 'inline-block';
-    downloadBtn.download = `photo_with_figurka_${new Date().getTime()}.png`;
+    // Настраиваем кнопку сохранения для мобильных устройств
+    setupDownloadButton(dataUrl);
     
     setTimeout(() => {
         resultPhoto.style.display = 'none';
         downloadBtn.style.display = 'none';
     }, 7000);
+}
+
+// Новая функция для сохранения на мобильных
+function setupDownloadButton(dataUrl) {
+    downloadBtn.style.display = 'inline-block';
+    
+    // Для всех устройств
+    downloadBtn.href = dataUrl;
+    
+    // Для Android и desktop
+    downloadBtn.download = 'photo_with_figurka.png';
+    
+    // Для iOS - обрабатываем нажатие по-особому
+    downloadBtn.onclick = function(e) {
+        // Проверяем, iOS ли это
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        if (isIOS) {
+            e.preventDefault();
+            // Создаем временную ссылку для iOS
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.target = '_blank';
+            link.download = 'photo_with_figurka.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Альтернатива: открыть в новой вкладке (пользователь сам сохранит)
+            // window.open(dataUrl, '_blank');
+        }
+    };
 }
 
 // Функция для остановки камеры
@@ -96,7 +105,7 @@ function stopCamera() {
     }
 }
 
-// Обработчик ошибок видео с фигуркой
+// Обработчик ошибок видео
 overlayVideo.addEventListener('error', (e) => {
     console.error('Ошибка загрузки видео фигурки:', e);
     alert('Не удалось загрузить видео с фигуркой. Проверьте путь к файлу.');
@@ -108,9 +117,5 @@ overlayVideo.addEventListener('loadeddata', () => {
 
 // Запускаем камеру
 startCamera();
-//getFigurkaFromURL();
-
 captureBtn.addEventListener('click', capturePhoto);
 window.addEventListener('beforeunload', stopCamera);
-
-
