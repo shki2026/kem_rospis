@@ -33,31 +33,50 @@ async function startCamera() {
 }
 
 // Функция для создания фото
+// Функция для создания фото (ИСПРАВЛЕННАЯ)
 function capturePhoto() {
+    // Проверяем готовность камеры
     if (cameraFeed.videoWidth === 0 || cameraFeed.videoHeight === 0) {
         alert('Камера еще не готова, подождите секунду');
         return;
     }
 
+    // Устанавливаем размеры canvas равными размеру видео с камеры
     canvas.width = cameraFeed.videoWidth;
     canvas.height = cameraFeed.videoHeight;
     
     const ctx = canvas.getContext('2d');
     
-    // Рисуем фон с камеры
+    // 1. Рисуем фон с камеры (зеркалим, если нужно, чтобы совпадало с предпросмотром)
+    // Так как мы не зеркалим видео в CSS, рисуем как есть.
     ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
     
-    // Рисуем фигурку
-    ctx.drawImage(overlayVideo, 0, 0, canvas.width, canvas.height);
+    // 2. ПОЛУЧАЕМ РЕАЛЬНЫЕ КООРДИНАТЫ И РАЗМЕРЫ ФИГУРКИ НА ЭКРАНЕ
+    const overlayRect = overlayVideo.getBoundingClientRect();
+    const cameraRect = cameraFeed.getBoundingClientRect();
     
-    // Показываем результат
+    // 3. Вычисляем коэффициенты масштабирования между экранным видео и реальным размером кадра
+    const scaleX = canvas.width / cameraRect.width;
+    const scaleY = canvas.height / cameraRect.height;
+    
+    // 4. Вычисляем позицию и размер фигурки в координатах canvas
+    const x = (overlayRect.left - cameraRect.left) * scaleX;
+    const y = (overlayRect.top - cameraRect.top) * scaleY;
+    const width = overlayRect.width * scaleX;
+    const height = overlayRect.height * scaleY;
+    
+    // 5. Рисуем фигурку поверх фона, в правильном месте и правильного размера
+    ctx.drawImage(overlayVideo, x, y, width, height);
+    
+    // 6. Показываем результат
     const dataUrl = canvas.toDataURL('image/png');
     resultPhoto.src = dataUrl;
     resultPhoto.style.display = 'block';
     
-    // Настраиваем кнопку сохранения для мобильных устройств
+    // Настраиваем кнопку сохранения
     setupDownloadButton(dataUrl);
     
+    // Автоматически скрываем результат через 7 секунд
     setTimeout(() => {
         resultPhoto.style.display = 'none';
         downloadBtn.style.display = 'none';
@@ -119,3 +138,4 @@ overlayVideo.addEventListener('loadeddata', () => {
 startCamera();
 captureBtn.addEventListener('click', capturePhoto);
 window.addEventListener('beforeunload', stopCamera);
+
